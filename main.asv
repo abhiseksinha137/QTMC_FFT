@@ -41,44 +41,29 @@ set(gcf, 'Position',  [402 235 425 210])
 title('Field')
 
 %% Ionization
-% nstar=Z/(2*Ip);
-% w=(2*(2*Ip)^(3/2)./E).^(2*nstar-abs(m)-1) .* exp(-2*(2*Ip)^(3/2)./(3*E));
-% w=abs(w);
-% 
-% w(isnan(w)) = 0;
-% w(isnan(w)) = 0;
-% for i=1:length(w)
-%     if isnan(w(i))
-%         w(i)=0;
-%     end
-%     if isinf(w(i))
-%         w(i)=0;
-%     end
-% end
-% % w(w==1)=max(w);
-% w=w/sum(w);
-% figure();
-% semilogy(t/fs,w)
-n=3;
-w=abs(E.^n);
+nstar=Z/(2*Ip);
+w=(2*(2*Ip)^(3/2)./E).^(2*nstar-abs(m)-1) .* exp(-2*(2*Ip)^(3/2)./(3*E));
+w=abs(w);
+w(isnan(w)) = 0;
+w(isnan(w)) = 0;
+for i=1:length(w)
+    if isnan(w(i))
+        w(i)=0;
+    end
+    if isinf(w(i))
+        w(i)=1;
+    end
+end
+w(w==1)=max(w)
 w=w/sum(w);
 figure();
 semilogy(t/fs,w)
+
 %% Propagation
 S=zeros(size(t));
-psi_t=zeros(size(t));
-tic;
 for i=1:length(t)-1
     k=-A(i);
     Aprime=A(i:N);
     tprime=t(i:N);
     S(i)=-trapz((k+Aprime).^2/2+Ip);
-    psi_t(i)=w(i)*exp(1i*S(i));
 end
-plot(t/fs,abs(psi_t))
-xlabel('t (fs)')
-ylabel('abs(\psi)')
-toc
-
-
-
