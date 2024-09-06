@@ -4,6 +4,7 @@ Reset;
 Wcm_2=1/3.50944e16;
 eV=1/27.2113962;
 fs=1/2.41888e-2;
+nm=5.29177249e-2;
 %% Sim Params
 Ip=13.6*eV;
 I0=1e14*Wcm_2;
@@ -14,11 +15,13 @@ m=0;
 % Derived Params
 E0=sqrt(I0);
 w=45.5633526/lambda;
-
+% define Position
+N=2^8;
+x=linspace(0,100*lambda*nm,N)';
 % Define the time
 t0=0;
 tend=100*fs;
-N=2^11;
+
 t=linspace(0,tend,N)';
 
 % Define the Field
@@ -32,12 +35,13 @@ end
 
 % Plot Field
 figure();
+subplot(1,2,1)
 plot(t/fs,E)
 ylabel('E')
 yyaxis right
 plot(t/fs,A)
 ylabel('A')
-set(gcf, 'Position',  [402 235 425 210])
+set(gcf, 'Position',  [297 227 812 210])
 title('Field')
 
 %% Ionization
@@ -62,22 +66,32 @@ title('Field')
 n=3;
 w=abs(E.^n);
 w=w/sum(w);
-figure();
+subplot(1,2,2)
 semilogy(t/fs,w)
 %% Propagation
 S=zeros(size(t));
-psi_t=zeros(size(t));
+
 tic;
+PSI_FFT=zeros(size(x));
 for i=1:length(t)-1
     k=-A(i);
     Aprime=A(i:N);
     tprime=t(i:N);
     S(i)=-trapz((k+Aprime).^2/2+Ip);
-    psi_t(i)=w(i)*exp(1i*S(i));
+    phase(i)=exp(1i*S(i));
+    psi=w(i)*phase(i)*sin(k*x);
+    psi_fft=fft(psi);
+    PSI_FFT=PSI_FFT+psi_fft;
+
 end
-plot(t/fs,abs(psi_t))
-xlabel('t (fs)')
+
+
+psi_p=abs(ifft(PSI_FFT)).^2;
+figure()
+plot(psi_p)
+
 ylabel('abs(\psi)')
+
 toc
 
 
